@@ -1,3 +1,14 @@
+#include <util/crc16.h>
+
+// CRC8 计算函数
+uint8_t crc8(const uint8_t *data, uint8_t len) {
+    uint8_t crc = 0;
+    for (uint8_t i = 0; i < len; i++) {
+        crc = _crc_ibutton_update(crc, data[i]);
+    }
+    return crc;
+}
+
 #include "BluetoothDataParser.h"
 
 // 构造函数
@@ -76,9 +87,23 @@ void BluetoothDataParser::processData() {
 
     // 当缓冲区存满8个字节时，处理这一组数据
     if (_bufferIndex >= UNIT_SIZE) {
-      // 检查数据有效性
+      // 检查数据有效性（包含 CRC 校验）
       if (_dataBuffer[0] == 0x55 && _dataBuffer[1] == 0x55) {
-        // 提取x、y倾角值（大端顺序）
+        // 验证 CRC 校验位
+        uint8_t received_crc = _dataBuffer[10];
+        uint8_t calculated_crc = crc8(_dataBuffer, 10);
+        
+        if (received_crc != calculated_crc) {
+          // CRC 校验失败，丢弃数据帧
+          Serial.println("CRC 校验失败，丢弃数据帧");
+          // 清除缓冲区并重置索引
+          memset(_dataBuffer, 0, sizeof(_dataBuffer));
+          _bufferIndex = 0;
+          return;
+        }
+        
+        // CRC 校验通过，处理数据
+        // 提取 x、y 倾角值（大端顺序）
         int16_t x_raw = (_dataBuffer[6] << 8) | _dataBuffer[7];
         int16_t y_raw = (_dataBuffer[8] << 8) | _dataBuffer[9];
         

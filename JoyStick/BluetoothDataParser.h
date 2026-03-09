@@ -5,7 +5,7 @@
 #include <MicroTFLite.h>
 
 // 定义缓冲区相关常量
-#define UNIT_SIZE 10 // 固定的数据单位大小（字节）
+#define UNIT_SIZE 11 // 固定的数据单位大小（字节，含 CRC 校验位）
 #define WINDOW_SIZE 10 // 滑动窗口大小
 
 class BluetoothDataParser {
