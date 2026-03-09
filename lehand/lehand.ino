@@ -3,7 +3,13 @@
 @date:    2024-03-01
 @version:  2.0
 @description: 体感手套控制程序
+
+更新说明：
+- 添加 CRC8 数据帧校验，提高蓝牙通信可靠性
+- 可能解决高度升高时失控问题
+
 */
+#include <util/crc16.h> //CRC 校验库
 
 #include <SoftwareSerial.h> //软串口库
 #include "LobotServoController.h" //机器人控制信号库
@@ -324,7 +330,8 @@ void run1(int mode)
       buf[9] = y_angle & 0xff; // y倾角低8位
       
       // 发送数据
-      Bth.write(buf, 10);
+      buf[10] = crc8(buf, 10); // 计算 CRC 校验位
+      Bth.write(buf, 11); // 发送 11 字节（含 CRC）
       key_state_changed = false; // 重置状态变化标记
       return; // 直接返回
     }
@@ -360,7 +367,8 @@ void run1(int mode)
     buf[9] = y_angle & 0xff; // y倾角低8位
     
     // 发送数据
-    Bth.write(buf, 10);
+    buf[10] = crc8(buf, 10); // 计算 CRC 校验位
+      Bth.write(buf, 11); // 发送 11 字节（含 CRC）
   }
 }
 
