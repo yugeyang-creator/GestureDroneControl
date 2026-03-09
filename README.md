@@ -7,7 +7,7 @@
 ## 项目结构
 
 ```
-Stampflycontroller/
+GestureDroneControl/
 ├── lehand/             # 体感手套源代码
 │   ├── I2Cdev.cpp      # I2C设备通信库
 │   ├── I2Cdev.h
